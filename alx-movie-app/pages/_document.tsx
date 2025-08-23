@@ -4,6 +4,10 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head />
+       {/* Link to manifest.json */}
+        <link rel="manifest" href="/manifest.json" />
+        {/* Theme color for PWA */}
+        <meta name="theme-color" content="#0070f3" />
         {/* Favicon */}
       <link rel="icon" href="/favicon.ico" />
       <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png" />
