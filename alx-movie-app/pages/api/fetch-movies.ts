@@ -1,32 +1,38 @@
 import { MoviesProps } from "@/interfaces";
 import { NextApiRequest, NextApiResponse } from "next";
-export default async function handler (request: NextApiRequest, response: NextApiResponse)  {
 
-  if (request.method === "POST") {
-    const { year, page, genre } = request.body;
-    const date = new Date();
-    const resp = await fetch(
-      `https://moviesdatabase.p.rapidapi.com/titles?year=${
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === "POST") {
+    try {
+      const { year, page, genre } = req.body;
+      const date = new Date();
+
+      const url = `https://moviesdatabase.p.rapidapi.com/titles?year=${
         year || date.getFullYear()
-      }&sort=year.decr&limit=12&page=${page}&${genre && `genre=${genre}`}`,
-      {
+      }&sort=year.decr&limit=12&page=${page}${genre ? `&genre=${genre}` : ""}`;
+
+      const resp = await fetch(url, {
         headers: {
           "x-rapidapi-host": "moviesdatabase.p.rapidapi.com",
-          "x-rapidapi-key": `${process.env.MOVIE_API_KEY}`,
+          "x-rapidapi-key": process.env.MOVIE_API_KEY || "",
         },
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(`Failed to fetch movies: ${resp.status} ${text}`);
       }
-    );
 
-    if (!resp.ok) throw new Error("Failed to fetch movies");
+      const moviesResponse = await resp.json();
+      const movies: MoviesProps[] = moviesResponse.results;
 
-    const moviesResponse = await resp.json();
-    const movies: MoviesProps[] = moviesResponse.results;
-
-    return response.status(200).json({
-      movies,
-    });
+      return res.status(200).json({ movies });
+    } catch (error: any) {
+      console.error("API error:", error.message);
+      return res.status(500).json({ error: error.message });
+    }
   } else {
-    response.setHeader('Allow', ['POST']);
-    response.status(405).end(`Method ${request.method} Not Allowed in here`);
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-};
+}
