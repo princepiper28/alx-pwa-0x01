@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const movies: MoviesProps[] = moviesResponse.results;
 
       return res.status(200).json({ movies });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("API error:", error.message);
       return res.status(500).json({ error: error.message });
     }
