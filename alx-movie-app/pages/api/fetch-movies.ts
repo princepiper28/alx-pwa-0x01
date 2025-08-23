@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const url = `https://moviesdatabase.p.rapidapi.com/titles?year=${
         year || date.getFullYear()
-      }&sort=year.decr&limit=12&page=${page}${genre ? `&genre=${genre}` : ""}`;
+      }&sort=year.decr&limit=12&page=${page || 1}${genre ? `&genre=${genre}` : ""}`;
 
       const resp = await fetch(url, {
         headers: {
@@ -24,15 +24,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const moviesResponse = await resp.json();
-      const movies: MoviesProps[] = moviesResponse.results;
+      const movies: MoviesProps[] = moviesResponse.results || [];
 
       return res.status(200).json({ movies });
     } catch (error: unknown) {
-      console.error("API error:", error.message);
-      return res.status(500).json({ error: error.message });
+      console.error("API error:", error);
+
+      const message =
+        error instanceof Error ? error.message : "An unknown error occurred";
+
+      return res.status(500).json({ error: message });
     }
   } else {
     res.setHeader("Allow", ["POST"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
