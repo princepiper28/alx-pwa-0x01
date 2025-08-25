@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+// types/movieTypes.ts
+import { ReactNode } from "react"
 
 export interface ComponentProps {
   children: ReactNode
@@ -9,28 +10,28 @@ export interface ButtonProps {
   action?: () => void
 }
 
+// UI-friendly type for rendering
 export interface MovieProps {
-  id?: string
+  id: string
   posterImage: string
-  releaseYear: string
   title: string
+  releaseYear: string
 }
 
-interface PrimaryImage {
-  url: string
-}
-
-interface TitleText {
-  text: string
-}
-
-interface ReleaseYear {
-  year: string
-}
-
+// API response type (from IMDb or similar)
 export interface MoviesProps {
   id: string
-  primaryImage: PrimaryImage
-  titleText: TitleText
-  releaseYear: ReleaseYear
+  primaryImage?: { url: string }
+  titleText?: { text: string }
+  releaseYear?: { year: number | string }
+}
+
+// Helper function to map API data → UI-friendly data
+export const mapMovies = (movies: MoviesProps[]): MovieProps[] => {
+  return movies.map((movie) => ({
+    id: movie.id,
+    posterImage: movie.primaryImage?.url ?? "/placeholder.png",
+    title: movie.titleText?.text ?? "Untitled",
+    releaseYear: movie.releaseYear?.year?.toString() ?? "N/A",
+  }))
 }

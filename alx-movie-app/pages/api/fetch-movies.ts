@@ -1,3 +1,33 @@
+// pages/api/fetch-movies.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    const response = await fetch(
+      "https://imdb236.p.rapidapi.com/api/imdb/search?type=movie&genre=Drama&rows=25&sortOrder=ASC&sortField=id",
+      {
+        method: "GET",
+        headers: {
+          "x-rapidapi-host": "imdb236.p.rapidapi.com",
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY as string, // <-- use env
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Fetched movies:", data); // Debugging
+    res.status(200).json(data);
+  } catch (error: any) {
+    console.error("Error fetching movies:", error.message);
+    res.status(500).json({ error: "Failed to fetch movies" });
+  }
+}
+
+
 import { MoviesProps } from "@/interfaces";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -40,4 +70,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
-
